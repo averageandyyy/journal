@@ -236,17 +236,17 @@ int main(int argc, char* argv[])
                 printf("Input length %li\n", strlen(input));
                 update_entry(input, MAX_LENGTH, readfile);
                 printf("Your entry was: %s\n", input);
-                fseek(to_read, 0, SEEK_SET);
                 fclose(to_read);
+                FILE *to_update = fopen(readfile, "w");
+                if (to_update == NULL)
+                {
+                    printf("Something went wrong!\n");
+                    return 1;
+                }
+                fputs(input, to_update);
+                printf("Writing complete! Check %s!\n", readfile);
+                fclose(to_update);
             }
-            
-            
-
-
-
-
-
-
             break;
     }
     return 0;
