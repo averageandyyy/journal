@@ -3,3 +3,6 @@ journal: journal.c
 
 output: output.c
 	gcc output.c -lncurses -o output
+
+getinput: getinput.c
+	gcc getinput.c -lncurses -o getinput

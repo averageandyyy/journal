@@ -11,10 +11,11 @@
 #include <errno.h>
 
 
-#define MAX_LENGTH 2048
+#define MAX_LENGTH 10
 #define NUM_YEARS 24
 #define NUM_MONTHS 12
 #define JOURNAL_FOLDER "entries"
+
 
 void get_entry(char *input, int max_length, char *folder);
 void get_date(char *date, size_t buffer_size);
@@ -28,7 +29,7 @@ int get_year_files(char *folder, char years[][8]);
 int get_month_files(char *folder,char months[][24]);
 int get_read_files(char *folder,char readfiles[][100]);
 void read_file(FILE *to_read);
-void update_entry(char *input, int max_length, char *folder);
+// void update_entry(char *input, int max_length, char *folder);
 
 
 int main(int argc, char* argv[])
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
         return 3;
     }
 
+    // showing current date once
     char date[80];
     get_date(date, sizeof(date));
     printf("Current date: %s\n", date);
@@ -63,7 +65,6 @@ int main(int argc, char* argv[])
     get_month(month, sizeof(month));
     char folder[80];
     (argc == 3) ? strcpy(folder,argv[2]) : strcpy(folder,JOURNAL_FOLDER);
-
     char input[MAX_LENGTH];
 
     switch (option)
@@ -218,35 +219,36 @@ int main(int argc, char* argv[])
                 printf("Failed to open %s.\n", readfile);
                 return 1;
             }
-            int read_or_update = -1;
-            while (read_or_update < 0 || read_or_update > 1)
-            {
-                printf("1 for read, 2 for update: ");
-                scanf("%i", &read_or_update);
-                read_or_update -= 1;
-            }
-            if (read_or_update == 0)
-            {
-                read_file(to_read);
-            }
-            else if (read_or_update == 1)
-            {
-                size_t bytes_read = fread(input, sizeof(char), MAX_LENGTH - 1, to_read);
-                input[bytes_read] = '\0';
-                printf("Input length %li\n", strlen(input));
-                update_entry(input, MAX_LENGTH, readfile);
-                printf("Your entry was: %s\n", input);
-                fclose(to_read);
-                FILE *to_update = fopen(readfile, "w");
-                if (to_update == NULL)
-                {
-                    printf("Something went wrong!\n");
-                    return 1;
-                }
-                fputs(input, to_update);
-                printf("Writing complete! Check %s!\n", readfile);
-                fclose(to_update);
-            }
+            read_file(to_read);
+            // int read_or_update = -1;
+            // while (read_or_update < 0 || read_or_update > 1)
+            // {
+            //     printf("1 for read, 2 for update: ");
+            //     scanf("%i", &read_or_update);
+            //     read_or_update -= 1;
+            // }
+            // if (read_or_update == 0)
+            // {
+            //     read_file(to_read);
+            // }
+            // else if (read_or_update == 1)
+            // {
+            //     size_t bytes_read = fread(input, sizeof(char), MAX_LENGTH - 1, to_read);
+            //     input[bytes_read] = '\0';
+            //     printf("Input length %li\n", strlen(input));
+            //     update_entry(input, MAX_LENGTH, readfile);
+            //     printf("Your entry was: %s\n", input);
+            //     fclose(to_read);
+            //     FILE *to_update = fopen(readfile, "w");
+            //     if (to_update == NULL)
+            //     {
+            //         printf("Something went wrong!\n");
+            //         return 1;
+            //     }
+            //     fputs(input, to_update);
+            //     printf("Writing complete! Check %s!\n", readfile);
+            //     fclose(to_update);
+            // }
             break;
     }
     return 0;
@@ -259,107 +261,15 @@ void get_entry(char *input, int max_length, char *folder)
     initscr(); // initialize ncurses
     cbreak();  // disable line buffering, receive input character by character
     keypad(stdscr, TRUE); // enable keypad for arrow key input
+    
 
 
     mvprintw(0, 0, "writing to %s", folder);
     mvprintw(1, 0, "Enter a string (maximum %d characters)", max_length - 1);
-    mvprintw(2, 0, "Character count: 0/%d", max_length - 1);
+    mvprintw(2, 0, "Type here: ");
     refresh();
 
-    int length = 0;
-    int cursorPos = 0;
-    int ch;
-    while((ch = getch()) != '\n' && length < max_length - 1)
-    {
-        if (ch == ERR)
-        {
-            continue;
-        }
-
-        if (ch == KEY_BACKSPACE || ch == 127 || ch == KEY_DC) // handle backspace
-        {
-            if (cursorPos > 0)
-            {
-                // deletes character before cursorPos and moves it there
-                mvdelch(3, cursorPos - 1);
-                // cursorPos variable yet to be updated
-                // thus we can use it to update the input array
-                // chars before cursorPos at updated to become those one place after it
-                for (int i = cursorPos - 1; i < length - 1; i++)
-                {
-                    input[i] = input[i+1];
-                    mvprintw(3, i, "%c", input[i]);
-                }
-                // however input[length - 1] is not updated?
-                // but because the length variable decrements later
-                // that variable will be set to \0 so no worries!
-                // while there are characters left behind
-                // the length variable 'truncates' it so it appears as normal
-                mvprintw(3, length - 1, " "); // clear last character
-                length--;
-                cursorPos--;
-                mvprintw(2, 17, "       "); // clear character count
-                mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                move(3, cursorPos);
-                refresh();
-            }
-        }
-        else if (ch == KEY_LEFT) // handle left arrow key
-        {
-            // nesting it like this seems to prevent the keys from being entered
-            if (cursorPos > 0)
-            {
-                cursorPos--;
-                move(3, cursorPos);
-                refresh();
-            }
-        }
-        else if (ch == KEY_RIGHT)
-        {
-            // nesting it like this seems to prevent the keys from being entered
-            if (cursorPos < length)
-            {
-                cursorPos++;
-                move(3, cursorPos);
-                refresh();   
-            }
-        }
-        else
-        {
-            // Insert character at cursorPos
-            if (cursorPos == length)
-            {
-                input[length] = ch;
-                mvprintw(3, cursorPos, "%c", ch);
-                length++;
-                cursorPos++;
-                mvprintw(2, 17, "       "); // clear character count
-                mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                move(3, cursorPos);
-                refresh();
-            }
-            else
-            {
-                for (int i = length; i > cursorPos; i--)
-                {
-                    input[i] = input[i - 1];
-                    mvprintw(3, i, "%c", input[i]);
-                    mvprintw(2, 17, "       "); // clear character count
-                    mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                }
-                input[cursorPos] = ch;
-                length++;
-                cursorPos++;
-                mvprintw(2, 17, "       "); // clear character count
-                mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                move(3, cursorPos);
-                refresh();
-            }
-
-        }
-    }
-
-    input[length] = '\0';
+    getnstr(input, max_length - 1);
 
     endwin();
 }
@@ -404,9 +314,6 @@ void get_month(char *month, size_t buffer_size)
     // format and writing timeinfo into buffer
     strftime(month, buffer_size, "%B", timeinfo);
 }
-
-
-
 
 void remove_new_line(char *str)
 {
@@ -569,115 +476,114 @@ void read_file(FILE *to_read)
 
 
 
-void update_entry(char *input, int max_length, char *folder)
-{
-    initscr(); // initialize ncurses
-    cbreak();  // disable line buffering, receive input character by character
-    keypad(stdscr, TRUE); // enable keypad for arrow key input
-    int length = strlen(input);
-    int cursorPos = strlen(input);
+// void update_entry(char *input, int max_length, char *folder)
+// {
+//     initscr(); // initialize ncurses
+//     cbreak();  // disable line buffering, receive input character by character
+//     keypad(stdscr, TRUE); // enable keypad for arrow key input
+//     int length = strlen(input);
+//     int cursorPos = strlen(input);
 
 
-    mvprintw(0, 0, "writing to %s", folder);
-    mvprintw(1, 0, "Enter a string (maximum %d characters)", max_length - 1);
-    mvprintw(2, 0, "Character count: %d/%d", length, max_length - 1);
-    mvprintw(3, 0, "%s", input);
-    move(3, cursorPos);
-    refresh();
+//     mvprintw(0, 0, "writing to %s", folder);
+//     mvprintw(1, 0, "Enter a string (maximum %d characters)", max_length - 1);
+//     mvprintw(2, 0, "Character count: %d/%d", length, max_length - 1);
+//     mvprintw(3, 0, "%s", input);
+//     move(3, cursorPos);
+//     refresh();
 
     
-    int ch;
-    while((ch = getch()) != '\n' && length < max_length - 1)
-    {
-        if (ch == ERR)
-        {
-            continue;
-        }
+//     int ch;
+//     while((ch = getch()) != '\n' && length < max_length - 1)
+//     {
+//         if (ch == ERR)
+//         {
+//             continue;
+//         }
 
-        if (ch == KEY_BACKSPACE || ch == 127 || ch == KEY_DC) // handle backspace
-        {
-            if (cursorPos > 0)
-            {
-                // deletes character before cursorPos and moves it there
-                mvdelch(3, cursorPos - 1);
-                // cursorPos variable yet to be updated
-                // thus we can use it to update the input array
-                // chars before cursorPos at updated to become those one place after it
-                for (int i = cursorPos - 1; i < length - 1; i++)
-                {
-                    input[i] = input[i+1];
-                    mvprintw(3, i, "%c", input[i]);
-                }
-                // however input[length - 1] is not updated?
-                // but because the length variable decrements later
-                // that variable will be set to \0 so no worries!
-                // while there are characters left behind
-                // the length variable 'truncates' it so it appears as normal
-                mvprintw(3, length - 1, " "); // clear last character
-                length--;
-                cursorPos--;
-                mvprintw(2, 17, "       "); // clear character count
-                mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                move(3, cursorPos);
-                refresh();
-            }
-        }
-        else if (ch == KEY_LEFT) // handle left arrow key
-        {
-            // nesting it like this seems to prevent the keys from being entered
-            if (cursorPos > 0)
-            {
-                cursorPos--;
-                move(3, cursorPos);
-                refresh();
-            }
-        }
-        else if (ch == KEY_RIGHT)
-        {
-            // nesting it like this seems to prevent the keys from being entered
-            if (cursorPos < length)
-            {
-                cursorPos++;
-                move(3, cursorPos);
-                refresh();   
-            }
-        }
-        else
-        {
-            // Insert character at cursorPos
-            if (cursorPos == length)
-            {
-                input[length] = ch;
-                mvprintw(3, cursorPos, "%c", ch);
-                length++;
-                cursorPos++;
-                mvprintw(2, 17, "       "); // clear character count
-                mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                move(3, cursorPos);
-                refresh();
-            }
-            else
-            {
-                for (int i = length; i > cursorPos; i--)
-                {
-                    input[i] = input[i - 1];
-                    mvprintw(3, i, "%c", input[i]);
-                    mvprintw(2, 17, "       "); // clear character count
-                    mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                }
-                input[cursorPos] = ch;
-                length++;
-                cursorPos++;
-                mvprintw(2, 17, "       "); // clear character count
-                mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
-                move(3, cursorPos);
-                refresh();
-            }
+//         if (ch == KEY_BACKSPACE || ch == 127 || ch == KEY_DC) // handle backspace
+//         {
+//             if (cursorPos > 0)
+//             {
+//                 // deletes character before cursorPos and moves it there
+//                 mvdelch(3, cursorPos - 1);
+//                 // cursorPos variable yet to be updated
+//                 // thus we can use it to update the input array
+//                 // chars before cursorPos at updated to become those one place after it
+//                 for (int i = cursorPos - 1; i < length - 1; i++)
+//                 {
+//                     input[i] = input[i+1];
+//                     mvprintw(3, i, "%c", input[i]);
+//                 }
+//                 // however input[length - 1] is not updated?
+//                 // but because the length variable decrements later
+//                 // that variable will be set to \0 so no worries!
+//                 // while there are characters left behind
+//                 // the length variable 'truncates' it so it appears as normal
+//                 mvprintw(3, length - 1, " "); // clear last character
+//                 length--;
+//                 cursorPos--;
+//                 mvprintw(2, 17, "       "); // clear character count
+//                 mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
+//                 move(3, cursorPos);
+//                 refresh();
+//             }
+//         }
+//         else if (ch == KEY_LEFT) // handle left arrow key
+//         {
+//             // nesting it like this seems to prevent the keys from being entered
+//             if (cursorPos > 0)
+//             {
+//                 cursorPos--;
+//                 move(3, cursorPos);
+//                 refresh();
+//             }
+//         }
+//         else if (ch == KEY_RIGHT)
+//         {
+//             // nesting it like this seems to prevent the keys from being entered
+//             if (cursorPos < length)
+//             {
+//                 cursorPos++;
+//                 move(3, cursorPos);
+//                 refresh();   
+//             }
+//         }
+//         else
+//         {
+//             // Insert character at cursorPos
+//             if (cursorPos == length)
+//             {
+//                 input[length] = ch;
+//                 mvprintw(3, cursorPos, "%c", ch);
+//                 length++;
+//                 cursorPos++;
+//                 mvprintw(2, 17, "       "); // clear character count
+//                 mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
+//                 move(3, cursorPos);
+//                 refresh();
+//             }
+//             else
+//             {
+//                 for (int i = length; i > cursorPos; i--)
+//                 {
+                    
+// input[i] = input[i - 1];                    mvprintw(3, i, "%c", input[i]);
+//                 }
+//                 input[cursorPos] = ch;
+//                 mvprintw(3, cursorPos, "%c", ch);
+//                 length++;
+//                 cursorPos++;
+//                 mvprintw(2, 17, "       "); // clear character count
+//                 mvprintw(2, 17, "%d/%d", length, max_length - 1); // print updated count
+//                 move(3, cursorPos);
+//                 refresh();
+//             }
 
-        }
-    }
+//         }
+//     }
 
-    input[length] = '\0';
+//     input[length] = '\0';
 
-    endwin();
-}
+//     endwin();
+// }

@@ -1,0 +1,1 @@
+hello this test was written and made at home. I am trying to test it extensively to see if there are any bugs. some changes that i have made while at home is updating where the mvprintw for new characters are placed. previously that was non-existent which was pretty weird if you ask mešit doesnt seem to detect a new line.
