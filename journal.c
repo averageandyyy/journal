@@ -100,9 +100,9 @@ int main(int argc, char* argv[])
 
 
                 printf("%s\n", directory);
-                char title[50];
+                char title[100];
                 printf("Give us a title: ");
-                fgets(title, 50, stdin);
+                fgets(title, 99, stdin);
                 remove_new_line(title);
                 if (strlen(title) == 0)
                 {
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
             strcat(readfile, readfiles[file_option]);
             printf("%s\n", readfile);
             printf("Opening %s...\n", readfile);
-            FILE *to_read = fopen(readfile, "r+");
+            FILE *to_read = fopen(readfile, "r");
             if (to_read == NULL)
             {
                 printf("Failed to open %s.\n", readfile);
@@ -315,11 +315,13 @@ void get_month(char *month, size_t buffer_size)
     strftime(month, buffer_size, "%B", timeinfo);
 }
 
+
 void remove_new_line(char *str)
 {
     size_t length = strcspn(str, "\n");
     str[length] = '\0';
 }
+
 
 bool file_exists(char *filename)
 {
@@ -331,6 +333,7 @@ bool file_exists(char *filename)
     
     return false;
 }
+
 
 int file_count(char *filepath)
 {
@@ -356,6 +359,7 @@ int file_count(char *filepath)
     return filecount;
 }
 
+
 bool create_directories(char *directory)
 {
     char command[100];
@@ -374,6 +378,7 @@ bool create_directories(char *directory)
         return false;
     }
 }
+
 
 int get_year_files(char *folder,char years[][8])
 {
@@ -403,9 +408,10 @@ int get_year_files(char *folder,char years[][8])
     return foldercount;
 }
 
+
 int get_month_files(char *folder,char months[][24])
 {
-    // years[NUM_YEARS][8];
+    // char months[NUM_MONTHS][24];
     DIR *directory = opendir(folder);
     if (directory == NULL)
     {
@@ -434,7 +440,7 @@ int get_month_files(char *folder,char months[][24])
 
 int get_read_files(char *folder,char readfiles[][100])
 {
-    // years[NUM_YEARS][8];
+    // char readfiles[100][100];
     DIR *directory = opendir(folder);
     if (directory == NULL)
     {
@@ -456,6 +462,7 @@ int get_read_files(char *folder,char readfiles[][100])
     closedir(directory);
     return filecount;
 }
+
 
 void read_file(FILE *to_read)
 {

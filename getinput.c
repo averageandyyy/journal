@@ -1,32 +1,39 @@
 #include <ncurses.h>
+#include <string.h>
 
-int main(void)
-{
-    char input[500];
-    
+int main() {
+    // Initialize ncurses
     initscr();
-    cbreak();
-    keypad(stdscr, TRUE);
 
-    int ch;
-    int length = 0;
-    move(3, 0);
-    while ((ch = getch()) != '\n' && length < 499)
-    {
-        if ((ch == KEY_BACKSPACE || ch == KEY_LEFT) && length > 0)
-        {
-            delch();
-            length--;
-        }
-        else
-        {
-            input[length] = ch;
-            length++;
-        }
-        
-    }
+    // Read the original string from a text file
+    FILE *file = fopen("file.txt", "r");
+    char originalString[100];
+    fgets(originalString, sizeof(originalString), file);
+    fclose(file);
+
+    // Create a copy of the original string
+    char updatedString[100];
+    strcpy(updatedString, originalString);
+
+    // Update the string
+    mvprintw(0, 0, "Original string: %s", originalString);
+    mvprintw(1, 0, "Enter a new string: ");
+    refresh();
+
+    // Get user input and update the string
+    getstr(updatedString);
+
+    // Display the updated string
+    clear();
+    mvprintw(0, 0, "Original string: %s", originalString);
+    mvprintw(1, 0, "Updated string: %s", updatedString);
+    refresh();
+
+    // Wait for user input
+    getch();
+
+    // Cleanup
     endwin();
 
-    input[length] = '\0';
-    printf("Your input was: %s\n", input);
+    return 0;
 }
