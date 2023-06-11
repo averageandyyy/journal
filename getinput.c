@@ -1,39 +1,56 @@
 #include <ncurses.h>
 #include <string.h>
 
-int main() {
-    // Initialize ncurses
+#define LENGTH 100
+
+int main() 
+{
+    
+    char input[LENGTH];
     initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
 
-    // Read the original string from a text file
-    FILE *file = fopen("file.txt", "r");
-    char originalString[100];
-    fgets(originalString, sizeof(originalString), file);
-    fclose(file);
-
-    // Create a copy of the original string
-    char updatedString[100];
-    strcpy(updatedString, originalString);
-
-    // Update the string
-    mvprintw(0, 0, "Original string: %s", originalString);
-    mvprintw(1, 0, "Enter a new string: ");
+    int length = 0;
+    printw("Getting some input");
+    move(1,0);
+    // printw("%i", getcurx(stdscr));
     refresh();
 
-    // Get user input and update the string
-    getstr(updatedString);
+    
 
-    // Display the updated string
-    clear();
-    mvprintw(0, 0, "Original string: %s", originalString);
-    mvprintw(1, 0, "Updated string: %s", updatedString);
-    refresh();
+    int ch;
+    while ((ch = getch()) != '\n' && length < LENGTH - 1)
+    {
+        if (ch == KEY_BACKSPACE)
+        {
+            if (length > 0)
+            {
+                // backspace moves cursor
+                if (getcurx(stdscr) == 0)
+                {
+                    move(getcury(stdscr) - 1, COLS - 1);
+                    delch();
+                    length--;
+                }
+                else
+                {
+                    mvdelch(getcury(stdscr), getcurx(stdscr) - 1);
+                    length--;
+                }
+            }
+        }
+        else if (ch < KEY_MIN || ch > KEY_MAX)
+        {
+            input[length] = ch;
+            addch(ch);
+            length++;
+        }
+    }
+    input[length] = '\0';
 
-    // Wait for user input
-    getch();
-
-    // Cleanup
     endwin();
-
+    printf("Your input was {%s}\n", input);
     return 0;
 }

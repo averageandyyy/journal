@@ -6,3 +6,6 @@ output: output.c
 
 getinput: getinput.c
 	gcc getinput.c -lncurses -o getinput
+
+getnstr: getnstr.c
+	gcc getnstr.c -lncurses -o getnstr
