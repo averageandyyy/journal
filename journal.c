@@ -269,7 +269,7 @@ void get_entry(char *input, int max_length, char *folder)
     mvprintw(2, 0, "Type here: ");
     refresh();
 
-    getnstr(input, max_length - 1);
+    getnstr(input, max_length);
 
     endwin();
 }
