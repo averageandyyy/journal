@@ -1,4 +1,10 @@
 # journal
-journal program written in C
+journal program written in C. input is made such that it mimics the terminal.
 
-i had initially started out trying to make my input window interactive similar to how you would interact with a terminal but it didn't work out. so i ended up using getnstr and removed the update function. sadge. the problem was with managing cursorpositions and the indexing of the input array whilst considering cursor movement with LR keys with deletes. the fact that it didnt wrap as troubling. but alls good now.
+Usage: ./journal [flags] [directory]
+
+flags are -w to write a new text file, -r to read an exiting text file and -u to update an existing text file.
+
+directory is optional, but reading and writing will be done in a entries/ directory by default if directory is not specified which will also be created if it does not exist when writing.
+
+file structure is entries/year/month/actualfile.txt
