@@ -1,0 +1,1 @@
+this is my program. its very simple, but whats cool about it is that it reflects word count in real time! this is an inserted line! there is also text wrap around and also i can move my cursor left and right. it can also perform deletes and insertions accordingly! blah blah blah
